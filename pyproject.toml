@@ -1,0 +1,21 @@
+# чтобы подтягивались библиотеки без конфликта с windows, ставить флаг --active
+# uv sync --active
+[project]
+name = "app1"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.136.1",
+    "pyinstaller>=6.20.0",
+    "python-dotenv>=1.2.2",
+    "rich>=15.0.0",
+    "typer>=0.25.1",
+    "uvicorn>=0.46.0",
+    "piper-tts>=1.4.2",
+    "sounddevice>=0.5.5",
+    "torch>=2.12.0",
+    "ru-normalizr>=0.2.0",
+    "scipy>=1.17.1",
+]

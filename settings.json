@@ -1,0 +1,6 @@
+{
+  "engine": "silero",
+  "model": "v5_5_ru",
+  "voice": "xenia",
+  "max_silence_time": 0.5
+}
