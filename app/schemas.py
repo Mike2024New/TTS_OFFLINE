@@ -4,9 +4,9 @@ __all__ = ['settings', 'Settings']
 
 
 class Settings(BaseModel):
-    engine: str = 'silero'
-    model: str = 'v5_5_ru'
-    voice: str = 'xenia'
+    engine: str = 'piper'
+    model: str = 'ru_RU-dmitri-medium'
+    voice: str = 'ru_RU-dmitri-medium'
     max_silence_time: float = 0.5
 
 

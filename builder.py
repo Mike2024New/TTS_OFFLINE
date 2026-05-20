@@ -23,6 +23,7 @@ def build(
         '--console',
         '--name', name,
         '--exclude-module', Path(__file__).stem,
+        '--icon=icon.ico',
     ]
 
     # сборка бинарных файлов (.dll, библиотек)
@@ -49,7 +50,7 @@ def build(
 
 if __name__ == '__main__':
     build(
-        name='app',
+        name='TTS',
         add_data=[
             Path('piper') / 'espeak-ng-data',
             Path('ru_normalizr') / 'dictionaries'
