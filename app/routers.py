@@ -42,7 +42,7 @@ def interrupt():
         raise HTTPException(status_code=400, detail=f'Ошибка прерывателя речи {err}')
 
 
-from app.tts.text_normalizers.library_words_manager import library_words_get, library_words_reset, library_words_update
+from app.text_normalizers.library_words_manager import library_words_get, library_words_reset, library_words_update
 
 
 @router.get(

@@ -11,7 +11,7 @@ print(f'[yellow]Загрузка модуля, подождите...[/yellow]')
 from app import message_bus, settings_manager, MODELS_DIR
 from app.main import app as component
 from app import JSON_LIBRARY_WORDS
-from app.tts.text_normalizers.library_words_manager import library_words_get, library_words_reset
+from app.text_normalizers.library_words_manager import library_words_get, library_words_reset
 from cli_addon import interactive
 
 app = typer.Typer(no_args_is_help=True)

@@ -2,11 +2,11 @@ import threading
 from collections import deque
 from time import sleep
 
-from app import message_bus, Message, COMPONENT_NAME
+from app import message_bus, Message, COMPONENT_NAME, settings_manager
 from app.tts import TTS_REGISTRY
 from app.tts.tts_engine_protocol import TTSEngine
 import numpy as np
-from app.tts.text_normalizers.main import normalizer
+from app.text_normalizers.main import normalizer
 from app.tts.audio_output import AudioOutput
 
 SUBCOMPONENT = 'TTS'
@@ -20,7 +20,7 @@ class TTS:
     def __init__(self):
         self._audio_output = AudioOutput()
         self._voice: TTSEngine | None = None
-        self.normalizer = normalizer  # нормализатор
+        self.normalizer = None  # нормализатор
         # общая очередь чанков без фиксированного размера, просто складываются все чанки подряд
         self._buffer = deque()
         # кольцевой буфер, для формирования коллекции чанков размером который поддерживает sounddevice (frames)
@@ -38,6 +38,8 @@ class TTS:
         """Запуск tts движка"""
         try:
             engine = TTS_REGISTRY.get(engine)
+            if settings_manager.settings.normalizer:
+                self.normalizer = normalizer  # нормализатор
             self._voice = engine()
             self._voice.start(model_name=model, voice=voice)  # загрузка модели
             self._audio_output.start(callback=self._callback, samplerate=self._voice.SAMPLERATE)  # запуск аудиодевайса
@@ -124,7 +126,8 @@ class TTS:
         self._last_bufer.clear()  # сброс последней фразы буфера
         self._stop_flag.clear()
         try:
-            text = self.normalizer(text=text, model_name=self._voice.model_name)
+            if settings_manager.settings.normalizer:
+                text = self.normalizer(text=text, model_name=self._voice.model_name)
             text = self.text_devider(text)  # деление текста, проверка чтобы он не превышал лимит по длине
             for part_text in text:
                 pcm_generator = self._voice.generate_speech_pcm(text=part_text, voice=voice)
@@ -153,7 +156,8 @@ class TTS:
 
         def say():
             for text in generator:
-                text = self.normalizer(text=text, model_name=self._voice.model_name)  # перевод дат в тексте в слова
+                if settings_manager.settings.normalizer_extends:
+                    text = self.normalizer(text=text, model_name=self._voice.model_name)  # перевод дат в тексте в слова
                 text = self.text_devider(text)  # деление текста, проверка чтобы он не превышал лимит по длине
                 for part_text in text:
                     pcm_generator = self._voice.generate_speech_pcm(text=part_text, voice=voice)
@@ -216,7 +220,7 @@ class TTS:
 
 if __name__ == '__main__':
     tts = TTS()
-    tts.start(engine='piper', model='ru_RU-denis-medium')
-    tts.say(text='3.12.12', voice='ru_RU-denis-medium', wait=True)
+    # tts.start(engine='piper', model='ru_RU-denis-medium')
+    # tts.say(text='3.12.12', voice='ru_RU-denis-medium', wait=True)
     # tts.say(text='Привет! Я Ксения! Меня знает вся Кения.', voice='xenia', wait=True)
     # tts.say(text='Привет! Я Айдар, мой голос мой дар.', voice='aidar', wait=True)

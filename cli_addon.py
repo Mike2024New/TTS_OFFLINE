@@ -1,9 +1,9 @@
 from rich import print
 from app.tts import get_info
 from app import settings_manager
-from app.tts.text_normalizers.main import get_current_language_by_model
+from app.text_normalizers.main import get_current_language_by_model
 import sys
-from app.tts.text_normalizers.get_curren_date_ru import get_current_date_ru
+from app.text_normalizers.get_curren_date_ru import get_current_date_ru
 
 __all__ = ['interactive']
 

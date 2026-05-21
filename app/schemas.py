@@ -8,6 +8,8 @@ class Settings(BaseModel):
     model: str = 'ru_RU-dmitri-medium'
     voice: str = 'ru_RU-dmitri-medium'
     max_silence_time: float = 0.5
+    normalizer: bool = True  # использовать ли нормализатор?
+    normalizer_extends: bool = True  # использовать ли расширения для нормализатора?
 
 
 # поле для импорта

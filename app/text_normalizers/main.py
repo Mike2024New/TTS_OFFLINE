@@ -1,6 +1,6 @@
-from app.tts.text_normalizers.eng import normalize as eng_normalize
-from app.tts.text_normalizers.ru import normalize as ru_normalize
-from app.tts.text_normalizers.library_words_manager import library_words_get
+from app.text_normalizers.eng.eng import normalize as eng_normalize
+from app.text_normalizers.ru.ru import normalize as ru_normalize
+from app.text_normalizers.library_words_manager import library_words_get
 
 __all__ = ['normalizer', 'get_current_language_by_model']
 library_words = None
