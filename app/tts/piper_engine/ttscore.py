@@ -2,13 +2,14 @@ import threading
 from time import sleep
 from piper import PiperVoice
 from collections import deque
-from app import PIPER_MODELS_DIR, message_bus, Message, COMPONENT_NAME
+from app.tts.piper_engine import PIPER_MODELS_DIR
+from app import message_bus, Message, COMPONENT_NAME
 from app.tts.tts_engine_protocol import TTSEngine
-from app.tts.piper.model_info import stt_info
+from app.tts.piper_engine.model_info import tts_info
 
 __all__ = ['TTSCore', ]
 
-SUBCOMPONENT = 'piper'
+SUBCOMPONENT = 'piper_engine'
 CHUNK_SIZE = 1024
 
 
@@ -17,14 +18,16 @@ class TTSCore(TTSEngine):
 
     def __init__(self):
         self._model = None
-        default_parameters = stt_info.get_default_parameters()
-        self.model_name = default_parameters.get('model')
-        self.voice = default_parameters.get('voice')
+        self.model_name = 'null'
+        self.voice = None
 
     def start(self, model_name: str | None = None, voice: str | None = None):
         self.voice = voice  # для этой модели голос не устанавливается, параметр просто для совместимости с другими моделями
-        self.model_name = model_name if model_name is not None else self.model_name
-        self._model = PiperVoice.load(str(PIPER_MODELS_DIR / f"{self.model_name}.onnx"))
+        self.model_name = model_name
+        if model_name not in tts_info.get_info():
+            raise RuntimeError(f'Модель `{model_name}` отсутствует в каталоге движков `piper_engine`')
+
+        self._model = PiperVoice.load(str(PIPER_MODELS_DIR / self.model_name))
         message_bus.add(
             Message(
                 component=COMPONENT_NAME,
@@ -42,7 +45,7 @@ class TTSCore(TTSEngine):
         [-3 -3  5 ...  7 14 13]
         * обычно фразы разбиваются по знакам припинания, здесь будет выдано 2 чанка.
         """
-        _voice = voice  # заглушка, в piper voice не меняется на лету (можно будет потом сделать пересоздание модели)
+        _voice = voice  # заглушка, в piper_engine voice не меняется на лету (можно будет потом сделать пересоздание модели)
         if self._model is None:
             raise RuntimeError(
                 f'Ошибка, запуска анализатора речи. Скорее всего не была загружена модель использу `start`'
@@ -88,7 +91,7 @@ if __name__ == '__main__':
 
 
     stt = TTSCore()
-    stt.start()
+    stt.start(model_name='ru_RU-dmitri-medium')
     threading.Thread(target=audio_output).start()
     while True:
         user_input = input(f'Введите любой текст для аудио:>_')

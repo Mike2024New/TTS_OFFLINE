@@ -8,23 +8,14 @@ import platform
 
 print(f'[yellow]Загрузка модуля, подождите...[/yellow]')
 
-from app import message_bus, settings_manager, MODELS_DIR
+from app import settings_manager, MODELS_DIR
 from app.main import app as component
-from app import JSON_LIBRARY_WORDS
+from app import JSON_LIBRARY_WORDS_PATH
 from app.text_normalizers.library_words_manager import library_words_get, library_words_reset
-from cli_addon import interactive
 
 app = typer.Typer(no_args_is_help=True)
 stop_print_messages = threading.Event()
 is_windows = platform.system() == "Windows"
-
-
-def print_messages():
-    """Печать сообщений в терминал (для запуска терминальной версии) cli"""
-    for msg in message_bus.stream():
-        if stop_print_messages.is_set():  # выход из бесконечного полинга сообщений
-            break
-        print(msg)
 
 
 @app.callback()
@@ -35,31 +26,30 @@ def main():
 @app.command()
 def run():
     """Запуск спикера в интерактивном режиме, произношение фраз в терминале [yellow]run[/yellow]"""
-    interactive(component)
-    # try:
-    #     interactive(component)
-    # except Exception as err:
-    #     component.stop()
-    #     print(f'Приложение завершило работу по причине: {err}')
+    from cli_addon import interactive
+
+    try:
+        interactive()
+    except Exception as err:
+        component.stop()
+        print(f'Приложение завершило работу по причине: {err}')
 
 
 @app.command()
 def run_server(
         port: int = typer.Option(8000, '--port', '-p'),
-        msg_print: bool = typer.Option(False, '--msg-print', '-msgp', is_flag=True),
 ):
     """
     Запуск сервера (информация о маршрутах доступна на docs) [yellow]run-server[/yellow]
     --port или -p указать порт на котором будет запущен сервер прямую
-    --msg-print или -msgp печатать сообщения из шины сообщений прямо в консоль
     """
     from server import server
-    url = f'http://localhost:{port}/docs/'
-    print(f'Сервер загружен url: `{url}`')
-
-    if msg_print:
-        # запуск печати сообщений прямо в терминал в режиме наблюдения (тогда messages будет пустой)
-        threading.Thread(target=print_messages, daemon=True).start()
+    url_docs = f'http://localhost:{port}/docs/'
+    url_info = f'http://localhost:{port}/info/'
+    url_shutdown = f'http://localhost:{port}/shutdown/'
+    print(f'Сервер загружен url: `{url_docs}`')
+    print(f'Информация по моделям: `{url_info}`')
+    print(f'Остановка сервера `{url_shutdown}`')
 
     try:
         server.start(port=port)
@@ -88,13 +78,13 @@ def normalize_list():
 def normalize_list_edit():
     """Просмотр кастомного словаря слов нормализации для произношения моделью [yellow]normalize-list-edit[/yellow]"""
     if is_windows:
-        os.startfile(JSON_LIBRARY_WORDS)
+        os.startfile(JSON_LIBRARY_WORDS_PATH)
         return
 
     try:
-        subprocess.call(["nano", JSON_LIBRARY_WORDS])
+        subprocess.call(["nano", JSON_LIBRARY_WORDS_PATH])
     except Exception:  # noqa
-        subprocess.call(['xdg-open', JSON_LIBRARY_WORDS])
+        subprocess.call(['xdg-open', JSON_LIBRARY_WORDS_PATH])
 
 
 @app.command()

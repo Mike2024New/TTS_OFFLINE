@@ -1,10 +1,11 @@
 import torch
-from app import SILERO_MODELS_DIR, COMPONENT_NAME, message_bus, Message
+from app.tts.silero_engine import SILERO_MODELS_DIR
+from app import COMPONENT_NAME, message_bus, Message
 import numpy as np
 from typing import Generator
 from app.tts.tts_engine_protocol import TTSEngine
 import warnings
-from app.tts.silero.model_info import stt_info
+from app.tts.silero_engine.model_info import tts_info
 
 # отключение предупреждений pytorch при загрузке silero (там есть свои внутренние ошибки, типа лишних `\` в регулярках
 warnings.filterwarnings('ignore', category=SyntaxWarning)
@@ -22,15 +23,16 @@ class TTSCore(TTSEngine):
 
     def __init__(self):
         self._model = None
-        default_parameters = stt_info.get_default_parameters()
-        self.model_name = default_parameters.get('model')
-        self.voice = default_parameters.get('voice')
+        self.model_name = 'null'
+        self.voice = 'null'
 
-    def start(self, model_name: str | None = None, voice: str | None = None):
-        self.voice = voice if voice is not None else self.voice
-        self.model_name = model_name if model_name is not None else self.model_name
+    def start(self, model_name: str, voice: str):
+        self.voice = voice
+        self.model_name = model_name
+        if model_name not in tts_info.get_info():
+            raise RuntimeError(f'Модель `{model_name}` отсутствует в каталоге движков `silero`')
         device = torch.device('cpu')
-        model_path = SILERO_MODELS_DIR / f"{self.model_name}.pt"
+        model_path = SILERO_MODELS_DIR / self.model_name
         self._model = torch.package.PackageImporter(str(model_path)).load_pickle("tts_models", "model")
 
         self._model.to(device)
@@ -99,5 +101,5 @@ class TTSCore(TTSEngine):
 
 if __name__ == '__main__':
     tts = TTSCore()
-    tts.start(voice='xen')
+    tts.start(model_name='v5_ru', voice='xenia')
     [print(i) for i in tts.generate_speech_pcm(text='Скажи что нибудь')]

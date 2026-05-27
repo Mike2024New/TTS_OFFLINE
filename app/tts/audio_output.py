@@ -2,10 +2,11 @@ from time import sleep
 import numpy as np
 import sounddevice as sd
 from typing import Callable
-from app import settings_manager, message_bus, Message, COMPONENT_NAME
+from app import message_bus, Message, COMPONENT_NAME
+
+MAX_SILENCE_TIME = 0.5
 
 SUBCOMPONENT = 'audio_input'
-
 __all__ = ['AudioOutput', ]
 
 
@@ -30,7 +31,7 @@ class AudioOutput:
                 blocksize = frames
                 self._polling_time = blocksize / samplerate
                 # вычисление лимита чанков, чтобы отследить тишину
-                silence_time = settings_manager.settings.max_silence_time
+                silence_time = MAX_SILENCE_TIME
                 self._silence_limit = silence_time / self._polling_time
             callback(outdata, frames, time, status)
 

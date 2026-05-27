@@ -4,7 +4,7 @@ __all__ = ['settings', 'Settings']
 
 
 class Settings(BaseModel):
-    engine: str = 'piper'
+    engine: str = 'piper_engine'
     model: str = 'ru_RU-dmitri-medium'
     voice: str = 'ru_RU-dmitri-medium'
     max_silence_time: float = 0.5

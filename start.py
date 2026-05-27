@@ -4,17 +4,6 @@ import subprocess
 """
 Установка зависимостей
 """
-from pathlib import Path
-
-try:
-    resources_path = Path.cwd() / 'resources' / 'models'
-    (resources_path / 'piper').mkdir(parents=True, exist_ok=True)
-    (resources_path / 'silero').mkdir(parents=True, exist_ok=True)
-except Exception as err:
-    print(
-        f'Не удалось создать каталоги для моделей, причина:`{err}`\n'
-        f'Создайте в главной каталоге проекта (там где лежит .venv) каталог resources/models, и в нем две папки silero и piper'
-    )
 
 try:
     print(f'Установка uv')

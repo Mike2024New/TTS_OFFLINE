@@ -1,11 +1,10 @@
-from typing import Literal
-
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, Request
 from app import message_bus
 from app.main import app as component
 from utils.message_bus_manager.message_bus_manager import Message
 from app.routers import router
 from app import settings_manager, Settings
+from config.moduls import TTS_INFO
 from server._server import Server
 
 app = FastAPI()
@@ -13,6 +12,29 @@ app.include_router(router)
 server = Server(application=app)
 
 __all__ = ['server']  # объект для управления сервером
+
+
+@app.get(
+    '/info/',
+    summary='Общая информация о доступных движках, их моделях и голосах если есть.'
+)
+def test(request: Request):
+    info_data = {}
+    port = request.url.port
+    for eng in TTS_INFO:
+        info_data[eng] = {}
+        for model in TTS_INFO[eng]:
+            info_data[eng][model] = {
+                'voices': [],
+                'urls': [],
+                'lang': TTS_INFO[eng][model]['lang'],
+            }
+            for voice in TTS_INFO[eng][model]['voices']:
+                url = f'http://localhost:{port}/start/?engine={eng}&model={model}&voice={voice}'
+                info_data[eng][model]['voices'].append(voice)
+                info_data[eng][model]['urls'].append(url)
+
+    return {'info': info_data}
 
 
 @app.get('/status/')
@@ -24,7 +46,8 @@ def component_status():
 
 
 @app.get('/start/')
-def component_start(engine: Literal['piper', 'silero'], model: str | None = None, voice: str | None = None):
+def component_start(engine: str, model: str | None = None, voice: str | None = None):
+    """Информацию о движках и моделях можно посмотреть в `/info/`, там же можно получить url для запуска приложения"""
     component.start(engine=engine, model=model, voice=voice)
     return {
         'msg': f'Компонент `{component.name}` запущен.',

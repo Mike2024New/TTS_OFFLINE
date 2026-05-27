@@ -1,11 +1,13 @@
-from app import PIPER_MODELS_DIR, message_bus, Message, COMPONENT_NAME
+import re
+from app.tts.piper_engine import PIPER_MODELS_DIR
+from app import message_bus, Message, COMPONENT_NAME
 import json
 
 SUBCOMPONENT = 'STTInfo'
-__all__ = ['stt_info']
+__all__ = ['tts_info']
 
 
-class STTInfo:
+class TTSInfo:
     def __init__(self):
         self.update_models_list()  # проверка списка моделей
 
@@ -20,7 +22,7 @@ class STTInfo:
 
     def update_models_list(self):
         models_list_from_json = self.get_info()
-        models_list_actual = [mod.parts[-1].replace('.onnx', '') for mod in PIPER_MODELS_DIR.iterdir() if
+        models_list_actual = [mod.parts[-1] for mod in PIPER_MODELS_DIR.iterdir() if
                               mod.name.endswith('.onnx')]
 
         if not models_list_actual == list(models_list_from_json.keys()):
@@ -33,33 +35,18 @@ class STTInfo:
                     message='Обновление списка моделей `piper` это может занять некоторое время',
                 )
             )
+
             for model_name in models_list_actual:
-                models_info[model_name] = [model_name]
+                lang = re.search(pattern=r'^(\S\S\_\S\S)\-', string=model_name)
+                lang = lang.group(1) if lang is not None else None
+                models_info[model_name] = {'voices': [model_name], 'lang': lang}
+
             with open(file=(PIPER_MODELS_DIR / 'info.json'), mode='w', encoding='utf8') as f:
                 f.write(json.dumps(models_info, ensure_ascii=False, indent=2))
 
-    def get_default_parameters(self) -> dict[str, str]:
-        try:
-            data = self.get_info()
-            first_model = list(data.keys())[0]
-            first_voice = data.get(first_model)[0]
-            default_parameters = {'model': first_model, 'voice': first_voice}
-            return default_parameters
-        except Exception as err:
-            message_bus.add(
-                Message(
-                    component=COMPONENT_NAME,
-                    subcomponent=SUBCOMPONENT,
-                    level='error',
-                    message=f'Не удалось прочитать настройки по умолчанию. Причина: {err}'
-                )
-            )
-            return {}
 
-
-stt_info = STTInfo()
+tts_info = TTSInfo()
 
 if __name__ == '__main__':
     # stt_info.update_models_list()
-    res = stt_info.get_default_parameters()
-    print(res)
+    print(tts_info.get_info())

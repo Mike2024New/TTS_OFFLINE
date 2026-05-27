@@ -1,5 +1,5 @@
 {
-  "ru": {
+  "ru_RU": {
     "CPU": "си пи ю",
     "GPU": "джи пи ю",
     "RAM": "рам",
@@ -9,9 +9,14 @@
     "CLI": "эс эл ай",
     "cli": "эс эл ай",
     "NEW": "Нью",
-    "python": "пайтон"
+    "python": "пайтон",
+    "country": "кантри",
+    "@": "собачка",
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
   },
-  "en": {
+  "en_EN": {
     "PC": "Personal Computer"
   }
 }

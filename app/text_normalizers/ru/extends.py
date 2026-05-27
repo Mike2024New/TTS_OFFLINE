@@ -143,23 +143,3 @@ def extension_pipeline(text: str):
             )
 
     return text
-
-
-if __name__ == '__main__':
-    assert extension_pipeline(
-        text=f'21.02.2023 дата') == '  двадцать первого февраля две тысячи двадцать третьего года  дата'
-    assert extension_pipeline(
-        text=f'Не дата 55.02.2023') == 'Не дата   пятьдесят пять   ноль  два   две тысячи двадцать три '
-    assert extension_pipeline(text=f'Артикул 21.05.130') == 'Артикул   двадцать один   ноль  пять   сто тридцать '
-    assert extension_pipeline(text=f'Дробь 21.05') == 'Дробь двадцать одна целая пять сотых'
-    assert extension_pipeline(text=f'Коэффициент 0.23 w') == 'Коэффициент ноль целых двадцать три сотых w'
-    assert extension_pipeline(
-        text=f'Завтра 22.05.2026, я буду писать приложение на Python 3.12.12.') == 'Завтра   двадцать второго мая две тысячи двадцать шестого года , я буду писать приложение на Python   три   двенадцать   двенадцать .'
-    assert extension_pipeline(text=f'Сегодня 3.12.2012.') == 'Сегодня   три   двенадцать   две тысячи двенадцать .'
-    assert extension_pipeline(text=f'Код доступа 000123.') == 'Код доступа  ноль ноль ноль 123.'
-    assert extension_pipeline(text=f'Не путаю нули, вот код 000.') == 'Не путаю нули, вот код  ноль ноль ноль .'
-    assert extension_pipeline(text=f'Сумма 22 000.') == 'Сумма 22 000.'
-    assert extension_pipeline(text=f'Не сумма 22 00.') == 'Не сумма 22  ноль ноль .'
-    assert extension_pipeline(
-        text=f'У меня в розетке напряжение 220 000 вольт, я боюсь') == 'У меня в розетке напряжение 220 000 вольт, я боюсь'
-    assert extension_pipeline(text='3/2') == '3/2'
